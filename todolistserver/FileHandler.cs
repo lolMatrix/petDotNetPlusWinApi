@@ -13,6 +13,11 @@ namespace todolistserver
     {
         private List<Event> events;
 
+        /// <summary>
+        /// Получает запись по id
+        /// </summary>
+        /// <param name="id">id lol</param>
+        /// <returns>Запись лол</returns>
         public Event GetEvent(int id) => events.FirstOrDefault(x => x.Id == id);
 
         private string path;
@@ -22,7 +27,10 @@ namespace todolistserver
             path = dbPath;
             OpentDb(dbPath);
         }
-
+        /// <summary>
+        /// Получает из файла данные и сохраняет путь
+        /// </summary>
+        /// <param name="path"></param>
         private void OpentDb(string path)
         {
             using var file = new FileStream(path, FileMode.OpenOrCreate);
@@ -39,7 +47,11 @@ namespace todolistserver
             }
            
         }
-
+        /// <summary>
+        /// Добавление записи
+        /// </summary>
+        /// <param name="json">Сериализованный json'чик</param>
+        /// <returns>индекс в бд</returns>
         public int AddArticle(string json)
         {
             Event newArticle = JsonSerializer.Deserialize<Event>(json);
@@ -53,6 +65,11 @@ namespace todolistserver
             return index;
         }
 
+        /// <summary>
+        /// Удаляет по id запись в бд
+        /// </summary>
+        /// <param name="id">id lol</param>
+        /// <returns>0, если все ок. -1, если все не ок</returns>
         public int DeleteArticle(int id)
         {
             var resultCode = 0;
@@ -64,20 +81,26 @@ namespace todolistserver
 
             return resultCode;
         }
-
-        public int UpdateArticle(int id, string json)
+        /// <summary>
+        /// обновляет запись в бд по id 
+        /// </summary>
+        /// <param name="id">id lol</param>
+        /// <param name="json">json сериализованная запись</param>
+        public void UpdateArticle(int id, string json)
         {
-            int resultCode = 0;
             Event updatedEvent = JsonSerializer.Deserialize<Event>(json);
             int countMatch = events.RemoveAll(x => x.Id == id);
 
             events.Add(updatedEvent);
-
-            return resultCode;
         }
 
+        /// <summary>
+        /// Получает все записи в формате json
+        /// </summary>
         public string GetJsonArticles => JsonSerializer.Serialize(events.ToArray());
-
+        /// <summary>
+        /// сохраняет изменения в файл
+        /// </summary>
         public void SaveChanges()
         {
             using var database = new FileStream(path, FileMode.Open);
@@ -86,6 +109,10 @@ namespace todolistserver
             formmater.Serialize(database, events.ToArray());
         }
 
+        /// <summary>
+        /// красивый енамчик, который переберает все все все записи
+        /// </summary>
+        /// <returns>одну запись</returns>
         public IEnumerable GetEvent()
         {
             foreach(var e in events)
