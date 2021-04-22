@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Configuration;
+using System.IO.Pipes;
+using System.Threading;
 
 namespace todolistserver
 {
@@ -11,30 +13,17 @@ namespace todolistserver
         /// <param name="args"></param>
         static void Main(string[] args)
         {
+            var handler = new FileHandler(ConfigurationManager.AppSettings.Get("dbPath"));
 
-            if (args.Length > 0)
-            {
-                var handler = new FileHandler(ConfigurationManager.AppSettings.Get("dbPath"));
-                switch (args[0])
-                {
-                    case "-c":
-                        Console.WriteLine(handler.AddArticle(args[1]));
-                        handler.SaveChanges();
-                        break;
-                    case "-r":
-                        var articles = handler.GetJsonArticles;
-                        Console.WriteLine(articles);
-                        break;
-                    case "-u":
-                        handler.UpdateArticle(int.Parse(args[1]), args[2]);
-                        handler.SaveChanges();
-                        break;
-                    case "-d":
-                        handler.DeleteArticle(int.Parse(args[1]));
-                        handler.SaveChanges();
-                        break;
-                }
-            }
+            var pipe = new NamedPipeServerStream(ConfigurationManager.AppSettings.Get("pipeName"));
+
+            var presentor = new Presentor(pipe, handler);
+
+            Thread thread = new Thread(presentor.Start);
+
+            thread.Start();
         }
+
+        
     }
 }
