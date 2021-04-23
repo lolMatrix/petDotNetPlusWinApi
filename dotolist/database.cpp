@@ -3,39 +3,46 @@
 #include <QDebug>
 #include <QJsonArray>
 #include <QList>
+#include <QLocalSocket>
 #include <QProcess>
 #include <qjsondocument.h>
-
+#include <QThread>
 
 
 Database::Database(QString pathToDatabase, QObject *parent)
 {
     path = pathToDatabase;
     this->parent = parent;
+    server = new QProcess(parent);
+    server->start(path);
+    while( server->state() != QProcess::Running)
+    {
+        QThread::msleep(100);
+    }
+    int a = 0;
 }
 
 QList<Event *>* Database::Read()
 {
-    QProcess *server =  new QProcess(parent);
-    server->start(path, QStringList("-r"));
-    server->waitForFinished();
+
+    QLocalSocket socket(parent);
+    socket.connectToServer("todolistserverepta");
+    socket.waitForConnected();
     QList<Event *> *events;
-    if(server->canReadLine())
-    {
-        QByteArray buff = server->readLine();
-        std::string json = buff.toStdString();
-        events = DeserializeData(json);
-    }
+    socket.write("-r\n");
+    socket.waitForBytesWritten();
+    socket.waitForReadyRead();
+    QByteArray buff = socket.readLine();
+    std::string json = buff.toStdString();
+    events = DeserializeData(json);
     return events;
 }
 
 int Database::Delete(int id)
 {
-    QProcess *server =  new QProcess(parent);
     QList<QString> args;
     args.append(QString("-d"));
     args.append(QString::number(id));
-    server->start(path, QStringList(args));
     server->waitForFinished();
     return server->exitCode();
 }

@@ -21,7 +21,6 @@ namespace todolistserver
         {
             stream.WaitForConnection();
 
-            using StreamWriter writer = new StreamWriter(stream);
             using StreamReader reader = new StreamReader(stream);
 
             while (stream.IsConnected)
@@ -36,7 +35,8 @@ namespace todolistserver
                         break;
                     case "-r":
                         var articles = handler.GetJsonArticles;
-                        writer.WriteLine(articles);
+                        var sendingPackege = Encoding.UTF8.GetBytes(articles);
+                        stream.Write(sendingPackege, 0, sendingPackege.Length);
                         break;
                     case "-u":
                         handler.UpdateArticle(int.Parse(reader.ReadLine()), reader.ReadLine());

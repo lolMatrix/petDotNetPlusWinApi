@@ -3,6 +3,7 @@
 
 #include <Event.h>
 #include <QObject>
+#include <QProcess>
 #include <QString>
 
 
@@ -18,6 +19,7 @@ public:
 private:
     QString path;
     QObject *parent;
+    QProcess *server;
     QList<Event *>* DeserializeData(std::string json);
 };
 

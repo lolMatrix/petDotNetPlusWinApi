@@ -19,9 +19,8 @@ namespace todolistserver
 
             var presentor = new Presentor(pipe, handler);
 
-            Thread thread = new Thread(presentor.Start);
-
-            thread.Start();
+            Thread da = new Thread(presentor.Start);
+            da.Start();
         }
 
         
