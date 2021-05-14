@@ -12,6 +12,7 @@
 class Database
 {
 public:
+    Database(QObject *parent);
     Database(QString pathToDatabase, QObject *parent);
     QList<Event *>* Read();
     int Delete(int id);

@@ -53,6 +53,8 @@ namespace todolistserver
                     }
                 }
             }
+
+            stream.Close();
         }
 
 

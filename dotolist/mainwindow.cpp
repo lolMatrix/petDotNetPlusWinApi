@@ -47,6 +47,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->menu->actions()[0], &QAction::triggered, this, &MainWindow::startServer);
     connect(ui->menu->actions()[1], &QAction::triggered, this, &MainWindow::stopServer);
     startServer();
+
+
 }
 
 MainWindow::~MainWindow()
@@ -314,7 +316,7 @@ void MainWindow::startServer()
 {
     if(db == NULL){
         char fileName[] = "D:\\Users\\drles\\source\\repos\\todolistserver\\todolistserver\\bin\\Debug\\netcoreapp3.1\\todolistserver.exe";
-        db = new Database(QString(fileName), this);
+        db = new Database(this);
         QList<Event*> *events = db->Read();
         if(events->count() > 0)
         {

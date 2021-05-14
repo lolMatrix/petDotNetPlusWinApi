@@ -9,6 +9,14 @@
 #include <QThread>
 
 
+Database::Database(QObject *parent)
+{
+    pipe = new QLocalSocket(parent);
+
+    pipe->connectToServer("todolistserverepta");
+    pipe->waitForConnected();
+}
+
 Database::Database(QString pathToDatabase, QObject *parent)
 {
     path = pathToDatabase;
@@ -75,10 +83,8 @@ int Database::Create(Event *newEvent)
 Database::~Database()
 {
     pipe->close();
-    server->close();
 
     delete pipe;
-    delete server;
 }
 
 QList<Event *>* Database::DeserializeData(std::string json)
