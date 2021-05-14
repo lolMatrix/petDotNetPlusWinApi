@@ -38,6 +38,8 @@ private:
     void DeserializeData(std::string json);
     void SetData(Event *newEvent, int row);
 private slots:
+    void startServer();
+    void stopServer();
     void deleteArticle();
     void addArticle();
     void getArticle();

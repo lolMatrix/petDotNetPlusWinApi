@@ -15,24 +15,21 @@ Database::Database(QString pathToDatabase, QObject *parent)
     this->parent = parent;
     server = new QProcess(parent);
     server->start(path);
-    while( server->state() != QProcess::Running)
-    {
-        QThread::msleep(100);
-    }
-    int a = 0;
+    QThread::msleep(1000);
+
+    pipe = new QLocalSocket(parent);
+
+    pipe->connectToServer("todolistserverepta");
+    pipe->waitForConnected();
 }
 
 QList<Event *>* Database::Read()
 {
-
-    QLocalSocket socket(parent);
-    socket.connectToServer("todolistserverepta");
-    socket.waitForConnected();
     QList<Event *> *events;
-    socket.write("-r\n");
-    socket.waitForBytesWritten();
-    socket.waitForReadyRead();
-    QByteArray buff = socket.readLine();
+    pipe->write("-r\n");
+    pipe->waitForBytesWritten();
+    pipe->waitForReadyRead();
+    QByteArray buff = pipe->readLine();
     std::string json = buff.toStdString();
     events = DeserializeData(json);
     return events;
@@ -40,45 +37,48 @@ QList<Event *>* Database::Read()
 
 int Database::Delete(int id)
 {
-    QList<QString> args;
-    args.append(QString("-d"));
-    args.append(QString::number(id));
-    server->waitForFinished();
-    return server->exitCode();
+    pipe->write("-d\n");
+    pipe->write(QString::number(id).append('\n').toStdString().c_str());
+    pipe->waitForBytesWritten();
+    return 0;
 }
 
-int Database::Update(Event *event)
+QList<Event*>* Database::Update(Event *event)
 {
-    QProcess *server =  new QProcess(parent);
-
-    QList<QString> args;
-    args.append(QString("-u"));
-    args.append(QString::number(event->id));
+    pipe->write("-u\n");
+    pipe->write(QString::number(event->id).append('\n').toStdString().c_str());
 
     QJsonDocument serializedData;
     serializedData.setObject(event->Serialize());
-    args.append(QString::fromUtf8(serializedData.toJson(QJsonDocument::Compact)));
+    pipe->write(QString::fromUtf8(serializedData.toJson(QJsonDocument::Compact)).append('\n').toStdString().c_str());
 
-    server->start(path, QStringList(args));
-    server->waitForFinished();
+    pipe->waitForBytesWritten();
 
-    return server->exitCode();
+    return Read();
 }
 
 int Database::Create(Event *newEvent)
 {
-    QProcess *server =  new QProcess(parent);
-    QList<QString> args;
-    args.append(QString("-c"));
+    pipe->write("-c\n");
     QJsonDocument serializedData;
     serializedData.setObject(newEvent->Serialize());
-    args.append(QString::fromUtf8(serializedData.toJson()));
-    server->start(path, QStringList(args));
-    server->waitForFinished();
-    char id[100];
-    server->readLine(id, 100);
-    newEvent->id = QString(id).toInt();
-    return server->exitCode();
+    pipe->write(QString::fromUtf8(serializedData.toJson(QJsonDocument::Compact)).append('\n').toStdString().c_str());
+    pipe->flush();
+    pipe->waitForBytesWritten();
+    pipe->waitForReadyRead();
+    QByteArray buff = pipe->readLine();
+    QString id = QString::fromUtf8(buff);
+    newEvent->id = id.toInt();
+    return 0;
+}
+
+Database::~Database()
+{
+    pipe->close();
+    server->close();
+
+    delete pipe;
+    delete server;
 }
 
 QList<Event *>* Database::DeserializeData(std::string json)

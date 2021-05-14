@@ -400,8 +400,32 @@
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>Чел, ты</string>
+    </property>
+    <addaction name="StartServer"/>
+    <addaction name="StopServer"/>
+   </widget>
+   <addaction name="menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="StartServer">
+   <property name="text">
+    <string>Старт чела</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="StopServer">
+   <property name="text">
+    <string>Стоп чел</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

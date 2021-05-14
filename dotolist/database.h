@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QProcess>
 #include <QString>
+#include <qlocalsocket.h>
 
 
 
@@ -14,9 +15,11 @@ public:
     Database(QString pathToDatabase, QObject *parent);
     QList<Event *>* Read();
     int Delete(int id);
-    int Update(Event *event);
+    QList<Event*>* Update(Event *event);
     int Create(Event *newEvent);
+    ~Database();
 private:
+    QLocalSocket *pipe;
     QString path;
     QObject *parent;
     QProcess *server;

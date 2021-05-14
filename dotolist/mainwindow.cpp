@@ -44,23 +44,14 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->deleteCurrent, SIGNAL(clicked()), this, SLOT(deleteArticle()));
     connect(ui->articleBrowser, SIGNAL(currentCellChanged(int, int, int, int)), this, SLOT(getArticle()));
     connect(ui->tenArticles, SIGNAL(clicked()), this, SLOT(setTenArticles()));
-
-    char fileName[] = "D:\\Users\\drles\\source\\repos\\todolistserver\\todolistserver\\bin\\Debug\\netcoreapp3.1\\todolistserver.exe";
-    db = new Database(QString(fileName), this);
-    QList<Event*> *events = db->Read();
-    if(events->count() > 0)
-    {
-        ui->editor->setEnabled(true);
-        ui->deleteCurrent->setEnabled(true);
-        for (int i = 0; i < events->count(); i++)
-        {
-            SetData(events->value(i), i);
-        }
-    }
+    connect(ui->menu->actions()[0], &QAction::triggered, this, &MainWindow::startServer);
+    connect(ui->menu->actions()[1], &QAction::triggered, this, &MainWindow::stopServer);
+    startServer();
 }
 
 MainWindow::~MainWindow()
 {
+    stopServer();
     delete ui;
 }
 
@@ -318,3 +309,28 @@ void MainWindow::SetData(Event *newEvent, int row)
     ui->articleBrowser->setCurrentCell(events->indexOf(newEvent), 0);
     ui->articleBrowser->setFocus();
 }
+
+void MainWindow::startServer()
+{
+    if(db == NULL){
+        char fileName[] = "D:\\Users\\drles\\source\\repos\\todolistserver\\todolistserver\\bin\\Debug\\netcoreapp3.1\\todolistserver.exe";
+        db = new Database(QString(fileName), this);
+        QList<Event*> *events = db->Read();
+        if(events->count() > 0)
+        {
+            ui->editor->setEnabled(true);
+            ui->deleteCurrent->setEnabled(true);
+            for (int i = 0; i < events->count(); i++)
+            {
+                SetData(events->value(i), i);
+            }
+        }
+    }
+}
+
+void MainWindow::stopServer()
+{
+    if (db != NULL)
+        delete db;
+}
+
