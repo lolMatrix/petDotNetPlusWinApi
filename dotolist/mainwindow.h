@@ -7,6 +7,7 @@
 #include <Loader.h>
 #include <QMainWindow>
 #include <QTableWidgetItem>
+#include <UpdateArticleThread.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -20,10 +21,14 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void readFromDataBase();
 private:
+    UpdateArticleThread *updateThread = NULL;
+    void clearBrowser();
+    void connectDatabase();
     void getData(Event *event);
     Loader loadIntoEvents;
-    Database *db;
+    Database *db = NULL;
     Ui::MainWindow *ui;
     QList<Event *> *events;
     int position;

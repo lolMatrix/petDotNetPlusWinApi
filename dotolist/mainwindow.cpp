@@ -15,6 +15,7 @@
 #include <QProcess>
 #include <QStringList>
 #include <Database.h>
+#include <UpdateArticleThread.h>
 #include "regexvalidator.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -46,15 +47,51 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->tenArticles, SIGNAL(clicked()), this, SLOT(setTenArticles()));
     connect(ui->menu->actions()[0], &QAction::triggered, this, &MainWindow::startServer);
     connect(ui->menu->actions()[1], &QAction::triggered, this, &MainWindow::stopServer);
-    startServer();
-
-
+    connectDatabase();
 }
 
 MainWindow::~MainWindow()
 {
     stopServer();
     delete ui;
+}
+
+void MainWindow::readFromDataBase()
+{
+    QList<Event*> *events = db->Read();
+    if(events->count() > 0)
+    {
+        ui->editor->setEnabled(true);
+        ui->deleteCurrent->setEnabled(true);
+        for (int i = 0; i < events->count(); i++)
+        {
+            SetData(events->value(i), i);
+        }
+    }
+}
+
+void MainWindow::clearBrowser()
+{
+    for (int i = events->count() - 1; i >= 0; i--) {
+        ui->articleBrowser->removeRow(i);
+    }
+
+    ui->editor->setEnabled(false);
+    ui->deleteCurrent->setEnabled(false);
+
+    for (int i = events->count() - 1; i >= 0; i--){
+        Event *e = events->takeAt(i);
+        delete e;
+    }
+}
+
+void MainWindow::connectDatabase()
+{
+    if(db == NULL){
+        db = new Database(this);
+        updateThread = new UpdateArticleThread(this);
+        updateThread->start();
+    }
 }
 
 void MainWindow::loadData(Event *event)
@@ -314,25 +351,33 @@ void MainWindow::SetData(Event *newEvent, int row)
 
 void MainWindow::startServer()
 {
+    updateThread->quit();
+    updateThread->wait();
+    delete updateThread;
+    clearBrowser();
+    delete db;
+    db = NULL;
+
     if(db == NULL){
         char fileName[] = "D:\\Users\\drles\\source\\repos\\todolistserver\\todolistserver\\bin\\Debug\\netcoreapp3.1\\todolistserver.exe";
-        db = new Database(this);
-        QList<Event*> *events = db->Read();
-        if(events->count() > 0)
-        {
-            ui->editor->setEnabled(true);
-            ui->deleteCurrent->setEnabled(true);
-            for (int i = 0; i < events->count(); i++)
-            {
-                SetData(events->value(i), i);
-            }
-        }
+        db = new Database(fileName, this);
+        readFromDataBase();
+        updateThread = new UpdateArticleThread(this);
+        updateThread->start();
     }
 }
 
+
+
 void MainWindow::stopServer()
 {
-    if (db != NULL)
+    clearBrowser();
+    if (db != NULL){
+        updateThread->quit();
+        updateThread->wait();
+        delete updateThread;
         delete db;
+        db = NULL;
+    }
 }
 

@@ -23,7 +23,7 @@ Database::Database(QString pathToDatabase, QObject *parent)
     this->parent = parent;
     server = new QProcess(parent);
     server->start(path);
-    QThread::msleep(1000);
+    QThread::msleep(1500);
 
     pipe = new QLocalSocket(parent);
 
@@ -82,6 +82,13 @@ int Database::Create(Event *newEvent)
 
 Database::~Database()
 {
+    if(server != NULL){
+        if(server->isOpen())
+            server->close();
+
+        delete server;
+    }
+
     pipe->close();
 
     delete pipe;

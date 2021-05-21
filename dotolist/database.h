@@ -23,7 +23,7 @@ private:
     QLocalSocket *pipe;
     QString path;
     QObject *parent;
-    QProcess *server;
+    QProcess *server = NULL;
     QList<Event *>* DeserializeData(std::string json);
 };
 
