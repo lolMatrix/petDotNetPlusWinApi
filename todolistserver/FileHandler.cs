@@ -37,14 +37,14 @@ namespace todolistserver
             if (file.Length > 0)
             {
                 var formatter = new BinaryFormatter();
-                var events = (Event[]) formatter.Deserialize(file);
+                var events = (Event[])formatter.Deserialize(file);
                 this.events = events.ToList();
             }
             else
             {
                 events = new List<Event>();
             }
-           
+
         }
         /// <summary>
         /// Добавление записи
@@ -57,7 +57,7 @@ namespace todolistserver
             events.Add(newArticle);
             int index = 0;
 
-            if(events.Count > 1)
+            if (events.Count > 1)
                 index = events.Max(x => x.Id) + 1;
 
             newArticle.Id = index;
@@ -96,7 +96,14 @@ namespace todolistserver
         /// <summary>
         /// Получает все записи в формате json
         /// </summary>
-        public string GetJsonArticles => JsonSerializer.Serialize(events.ToArray());
+        public string GetJsonArticles 
+        {
+            get
+            {
+                OpentDb(path);
+                return JsonSerializer.Serialize(events.ToArray());
+            }
+        }
         /// <summary>
         /// сохраняет изменения в файл
         /// </summary>

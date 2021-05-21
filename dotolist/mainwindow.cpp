@@ -15,7 +15,7 @@
 #include <QProcess>
 #include <QStringList>
 #include <Database.h>
-#include <UpdateArticleThread.h>
+#include <QTimer>
 #include "regexvalidator.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -43,7 +43,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->cancel, SIGNAL(clicked()), this, SLOT(cancel()));
     connect(ui->add, SIGNAL(clicked()), this, SLOT(addArticle()));
     connect(ui->deleteCurrent, SIGNAL(clicked()), this, SLOT(deleteArticle()));
-    connect(ui->articleBrowser, SIGNAL(currentCellChanged(int, int, int, int)), this, SLOT(getArticle()));
+    connect(ui->articleBrowser, SIGNAL(cellClicked(int, int)), this, SLOT(getArticle()));
     connect(ui->tenArticles, SIGNAL(clicked()), this, SLOT(setTenArticles()));
     connect(ui->menu->actions()[0], &QAction::triggered, this, &MainWindow::startServer);
     connect(ui->menu->actions()[1], &QAction::triggered, this, &MainWindow::stopServer);
@@ -58,6 +58,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::readFromDataBase()
 {
+    int currentRow = -1;
+    if(this->events != NULL && this->events->count()){
+        currentRow = ui->articleBrowser->currentRow();
+    }
+    clearBrowser();
     QList<Event*> *events = db->Read();
     if(events->count() > 0)
     {
@@ -67,6 +72,9 @@ void MainWindow::readFromDataBase()
         {
             SetData(events->value(i), i);
         }
+    }
+    if(currentRow != -1){
+        ui->articleBrowser->setCurrentCell(currentRow, 0);
     }
 }
 
@@ -85,12 +93,18 @@ void MainWindow::clearBrowser()
     }
 }
 
+void MainWindow::startNewTimer(){
+    timer = new QTimer(this);
+    timer->setInterval(5000);
+    connect(timer, &QTimer::timeout, this, &MainWindow::readFromDataBase);
+    timer->start(5000);
+}
+
 void MainWindow::connectDatabase()
 {
     if(db == NULL){
         db = new Database(this);
-        updateThread = new UpdateArticleThread(this);
-        updateThread->start();
+        startNewTimer();
     }
 }
 
@@ -277,6 +291,12 @@ void MainWindow::addArticle()
 void MainWindow::getArticle()
 {
     int position = ui->articleBrowser->currentRow();
+
+    if(position == currentArticle)
+        return;
+
+    currentArticle = position;
+
     if (position >= 0){
         getData(events->value(position));
     }
@@ -325,9 +345,11 @@ void MainWindow::updateAllTable()
         QTableWidgetItem *name = ui->articleBrowser->item(i, 0);
         QTableWidgetItem *date = ui->articleBrowser->item(i, 1);
         QTableWidgetItem *importance = ui->articleBrowser->item(i, 2);
-        name->setText(events->value(i)->name);
-        date->setText(events->value(i)->getEventDate().toString());
-        importance->setText(events->value(i)->getImportanceString(events->value(i)->eventImportance));
+        if(name != NULL && date != NULL && importance != NULL){
+            name->setText(events->value(i)->name);
+            date->setText(events->value(i)->getEventDate().toString());
+            importance->setText(events->value(i)->getImportanceString(events->value(i)->eventImportance));
+        }
     }
 }
 
@@ -345,16 +367,16 @@ void MainWindow::SetData(Event *newEvent, int row)
     ui->articleBrowser->setItem(row, 1, dateEvent);
     ui->articleBrowser->setItem(row, 2, important);
     shorting();
-    ui->articleBrowser->setCurrentCell(events->indexOf(newEvent), 0);
-    ui->articleBrowser->setFocus();
+}
+
+void MainWindow::stopTimer(){
+    timer->stop();
+    delete timer;
 }
 
 void MainWindow::startServer()
 {
-    updateThread->quit();
-    updateThread->wait();
-    delete updateThread;
-    clearBrowser();
+    stopTimer();
     delete db;
     db = NULL;
 
@@ -362,8 +384,7 @@ void MainWindow::startServer()
         char fileName[] = "D:\\Users\\drles\\source\\repos\\todolistserver\\todolistserver\\bin\\Debug\\netcoreapp3.1\\todolistserver.exe";
         db = new Database(fileName, this);
         readFromDataBase();
-        updateThread = new UpdateArticleThread(this);
-        updateThread->start();
+        startNewTimer();
     }
 }
 
@@ -373,9 +394,7 @@ void MainWindow::stopServer()
 {
     clearBrowser();
     if (db != NULL){
-        updateThread->quit();
-        updateThread->wait();
-        delete updateThread;
+        stopTimer();
         delete db;
         db = NULL;
     }

@@ -16,16 +16,14 @@ SOURCES += \
     loader.cpp \
     main.cpp \
     mainwindow.cpp \
-    regexvalidator.cpp \
-    updatearticlethread.cpp
+    regexvalidator.cpp
 
 HEADERS += \
     database.h \
     event.h \
     loader.h \
     mainwindow.h \
-    regexvalidator.h \
-    updatearticlethread.h
+    regexvalidator.h
 
 FORMS += \
     mainwindow.ui

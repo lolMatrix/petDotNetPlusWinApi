@@ -7,7 +7,6 @@
 #include <Loader.h>
 #include <QMainWindow>
 #include <QTableWidgetItem>
-#include <UpdateArticleThread.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -23,9 +22,9 @@ public:
 
     void readFromDataBase();
 private:
-    UpdateArticleThread *updateThread = NULL;
+    int currentArticle = -1;
+    QTimer *timer = NULL;
     void clearBrowser();
-    void connectDatabase();
     void getData(Event *event);
     Loader loadIntoEvents;
     Database *db = NULL;
@@ -42,7 +41,10 @@ private:
     void updateAllTable();
     void DeserializeData(std::string json);
     void SetData(Event *newEvent, int row);
+    void startNewTimer();
+    void stopTimer();
 private slots:
+    void connectDatabase();
     void startServer();
     void stopServer();
     void deleteArticle();
