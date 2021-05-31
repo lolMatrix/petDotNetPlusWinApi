@@ -7,10 +7,6 @@ namespace todolistserver
 {
     class Program
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="args"></param>
         static void Main(string[] args)
         {
             var handler = new FileHandler(ConfigurationManager.AppSettings.Get("dbPath"));

@@ -16,7 +16,10 @@ namespace todolistserver
             this.stream = stream;
             this.handler = handler;
         }
-
+        /// <summary>
+        /// Альфа и омега сервака
+        /// Запускает подключение и ждет данные
+        /// </summary>
         public void Start()
         {
             stream.WaitForConnection();
