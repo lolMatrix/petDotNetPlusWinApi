@@ -16,14 +16,15 @@
 #include <QStringList>
 #include <Database.h>
 #include "regexvalidator.h"
-
+//Мне стыдно... Правда... Не надо дальше проверять. Я же умру со стыда...
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    //делаем новую коллекцию
     events = new QList<Event *>();
-
+    //настройка уиииииииииииииииии
     ui->dateTimeEvent->setMaximumDateTime(QDateTime::currentDateTime().addYears(1));
     ui->dateTimeEvent->setMinimumDateTime(QDateTime::currentDateTime());
 
@@ -44,12 +45,13 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->deleteCurrent, SIGNAL(clicked()), this, SLOT(deleteArticle()));
     connect(ui->articleBrowser, SIGNAL(currentCellChanged(int, int, int, int)), this, SLOT(getArticle()));
     connect(ui->tenArticles, SIGNAL(clicked()), this, SLOT(setTenArticles()));
-
+//где сервер.
     char fileName[] = "D:\\Users\\drles\\source\\repos\\todolistserver\\todolistserver\\bin\\Debug\\netcoreapp3.1\\todolistserver.exe";
-    db = new Database(QString(fileName), this);
-    QList<Event*> *events = db->Read();
+    db = new Database(QString(fileName), this); //туть
+    QList<Event*> *events = db->Read();//читаем из бд
     if(events->count() > 0)
     {
+        //ну если не пусто то активируем редактор. Ну и устанавливаем значения
         ui->editor->setEnabled(true);
         ui->deleteCurrent->setEnabled(true);
         for (int i = 0; i < events->count(); i++)
@@ -57,13 +59,14 @@ MainWindow::MainWindow(QWidget *parent)
             SetData(events->value(i), i);
         }
     }
+    //Тута mvc должен быть...
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
 }
-
+//загружает в табличку данные
 void MainWindow::loadData(Event *event)
 {
     if (checkData(ui->hasPeriod->isChecked()))
@@ -82,7 +85,7 @@ void MainWindow::loadData(Event *event)
         updateData();
     }
 }
-
+//получает из редактора данные
 void MainWindow::getData(Event *event)
 {
     ui->name->setText(event->name);
@@ -98,31 +101,30 @@ void MainWindow::getData(Event *event)
 
 }
 
-
-
+//делегат на клик кнопки сохранить
 void MainWindow::load()
 {
     loadData(events->value(ui->articleBrowser->currentRow()));
 }
-
+//делает активными поля переода
 void MainWindow::setActivePeriods()
 {
     ui->period->setEnabled(ui->hasPeriod->isChecked());
     ui->repeatCount->setEnabled(ui->hasPeriod->isChecked());
 }
-
+//возвращает данные к сохранненному состоянию
 void MainWindow::cancel()
 {
     getData(events->value(ui->articleBrowser->currentRow()));
 }
-
+//заполняет моками
 void MainWindow::setTenArticles()
 {
     for (int i = 0; i < 10; i++){
         addArticle();
     }
 }
-
+//получает переод
 void MainWindow::getPeriod(Event *event)
 {
     switch (event->period.periodEvent)
@@ -171,7 +173,7 @@ void MainWindow::getImportance(Event *event){
         break;
     }
 }
-
+//проверка данных на валидность
 bool MainWindow::checkData(bool periodFlag)
 {
     bool result = true;
@@ -205,7 +207,7 @@ bool MainWindow::checkData(bool periodFlag)
     }
     return result;
 }
-
+//удаляет запись
 void MainWindow::deleteArticle()
 {
     int rowIndex = ui->articleBrowser->currentRow();
@@ -243,7 +245,7 @@ void MainWindow::addArticle()
     SetData(newEvent, row);
     db->Create(newEvent);
 }
-
+//делегат. устанавливает в браузер данные
 void MainWindow::getArticle()
 {
     int position = ui->articleBrowser->currentRow();
@@ -251,13 +253,13 @@ void MainWindow::getArticle()
         getData(events->value(position));
     }
 }
-
+//устанавливает флаги
 void MainWindow::setFlags(QTableWidgetItem *cell){
     Qt::ItemFlags flags = cell->flags();
     flags.setFlag(Qt::ItemIsEditable, false);
     cell->setFlags(flags);
 }
-
+//обновляет данные в табличке
 void MainWindow::updateData()
 {
     int row = ui->articleBrowser->currentRow();
@@ -273,7 +275,7 @@ void MainWindow::updateData()
     ui->articleBrowser->setCurrentCell(events->indexOf(e), 0);
     ui->editor->setFocus();
 }
-
+//сортировОчка пУзЫрЬкОм
 void MainWindow::shorting()
 {
     for (int i = 0; i < events->count(); i++){
@@ -288,7 +290,7 @@ void MainWindow::shorting()
 
     updateAllTable();
 }
-
+//обновляетВсюТаблицу
 void MainWindow::updateAllTable()
 {
     for(int i = 0; i < events->count(); i++){
@@ -300,7 +302,7 @@ void MainWindow::updateAllTable()
         importance->setText(events->value(i)->getImportanceString(events->value(i)->eventImportance));
     }
 }
-
+//задает данные
 void MainWindow::SetData(Event *newEvent, int row)
 {
     events->append(newEvent);

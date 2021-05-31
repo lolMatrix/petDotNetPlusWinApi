@@ -13,7 +13,7 @@ Database::Database(QString pathToDatabase, QObject *parent)
     path = pathToDatabase;
     this->parent = parent;
 }
-
+//чтение из бд
 QList<Event *>* Database::Read()
 {
     QProcess *server =  new QProcess(parent);
@@ -28,7 +28,7 @@ QList<Event *>* Database::Read()
     }
     return events;
 }
-
+//удаление из бд
 int Database::Delete(int id)
 {
     QProcess *server =  new QProcess(parent);
@@ -39,7 +39,7 @@ int Database::Delete(int id)
     server->waitForFinished();
     return server->exitCode();
 }
-
+//редактирование записи в бд
 int Database::Update(Event *event)
 {
     QProcess *server =  new QProcess(parent);
@@ -57,7 +57,7 @@ int Database::Update(Event *event)
 
     return server->exitCode();
 }
-
+//создание записи в бд
 int Database::Create(Event *newEvent)
 {
     QProcess *server =  new QProcess(parent);
@@ -73,7 +73,7 @@ int Database::Create(Event *newEvent)
     newEvent->id = QString(id).toInt();
     return server->exitCode();
 }
-
+//десериализация из ДЖОСОНА
 QList<Event *>* Database::DeserializeData(std::string json)
 {
     QJsonDocument jsonResponse = QJsonDocument::fromJson(QString::fromStdString(json).toUtf8());
