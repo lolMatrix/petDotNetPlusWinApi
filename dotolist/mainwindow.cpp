@@ -309,7 +309,7 @@ void MainWindow::SetData(Event *newEvent, int row)
     ui->articleBrowser->setCurrentCell(events->indexOf(newEvent), 0);
     ui->articleBrowser->setFocus();
 }
-
+//запуск сервера
 void MainWindow::startServer()
 {
     if(db == NULL){
@@ -327,7 +327,7 @@ void MainWindow::startServer()
         }
     }
 }
-
+//остановка сервера
 void MainWindow::stopServer()
 {
     if (db != NULL)

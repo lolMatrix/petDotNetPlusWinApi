@@ -22,7 +22,7 @@ Database::Database(QString pathToDatabase, QObject *parent)
     pipe->connectToServer("todolistserverepta");
     pipe->waitForConnected();
 }
-
+//считать всю бд
 QList<Event *>* Database::Read()
 {
     QList<Event *> *events;
@@ -34,7 +34,7 @@ QList<Event *>* Database::Read()
     events = DeserializeData(json);
     return events;
 }
-
+//удалить запись из бд
 int Database::Delete(int id)
 {
     pipe->write("-d\n");
@@ -42,7 +42,7 @@ int Database::Delete(int id)
     pipe->waitForBytesWritten();
     return 0;
 }
-
+//обновить запись в бд
 QList<Event*>* Database::Update(Event *event)
 {
     pipe->write("-u\n");
@@ -56,7 +56,7 @@ QList<Event*>* Database::Update(Event *event)
 
     return Read();
 }
-
+// создать запись в бд
 int Database::Create(Event *newEvent)
 {
     pipe->write("-c\n");
@@ -71,7 +71,7 @@ int Database::Create(Event *newEvent)
     newEvent->id = id.toInt();
     return 0;
 }
-
+//деструктор. Освобаждаем ресурсы
 Database::~Database()
 {
     pipe->close();
@@ -80,7 +80,7 @@ Database::~Database()
     delete pipe;
     delete server;
 }
-
+//десиаризация данных
 QList<Event *>* Database::DeserializeData(std::string json)
 {
     QJsonDocument jsonResponse = QJsonDocument::fromJson(QString::fromStdString(json).toUtf8());
