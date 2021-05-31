@@ -7,29 +7,28 @@ namespace todolistserver
 {
     class Program
     {
+        /// <summary>
+        /// Сколько тредов буит создано
+        /// </summary>
         private const int numTreads = 10;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="args"></param>
         static void Main(string[] args)
         {
-            
-
+            //список тредов
             List<Thread> threads = new List<Thread>();
 
-
+            //создаем numTreads тредов
             for (int i = 0; i < numTreads; i++)
             {
                 var thread = CreatePipe();
                 threads.Add(thread);
             }
-
+            //удаляем тред если соеденение в канаве
             while (threads.Count > 0)
             {
                 for (int i = threads.Count - 1; i >= 0; i--)
                 {
+
                     if (!threads[i].IsAlive)
                     {
                         threads.Remove(threads[i]);
@@ -40,6 +39,10 @@ namespace todolistserver
             }
         }
 
+        /// <summary>
+        /// Создает тред с готовым пайпом
+        /// </summary>
+        /// <returns>тред с пайпом</returns>
         private static Thread CreatePipe()
         {
             var handler = new FileHandler(ConfigurationManager.AppSettings.Get("dbPath"));

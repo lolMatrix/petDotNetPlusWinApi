@@ -8,7 +8,13 @@ namespace todolistserver
 {
     class Presentor
     {
+        /// <summary>
+        /// сама пайпа
+        /// </summary>
         private NamedPipeServerStream stream;
+        /// <summary>
+        /// то, что работает с файлом
+        /// </summary>
         private FileHandler handler;
 
         public Presentor(NamedPipeServerStream stream, FileHandler handler)
@@ -17,6 +23,9 @@ namespace todolistserver
             this.handler = handler;
         }
 
+        /// <summary>
+        /// Начальный метод. Запускает стрим и ждет данные
+        /// </summary>
         public void Start()
         {
             stream.WaitForConnection();
@@ -36,7 +45,7 @@ namespace todolistserver
                     {
                         case "-c":
                             Console.WriteLine("Create");
-                            lock (handler)
+                            lock (handler)//цэ пятая лаба ака блок ресурсов
                             {
                                 Console.WriteLine("Waiting for creating article...");
                                 int id = handler.AddArticle(reader.ReadLine());
